@@ -5,8 +5,8 @@ import (
 )
 
 type ServerSetting struct {
-	RunMode string `json:"runmode"`
-	Port    string `json:"httpport"`
+	// RunMode string `json:"runmode"`
+	Port string `json:"httpport"`
 }
 
 type DatabaseSetting struct {

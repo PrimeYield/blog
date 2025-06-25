@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"practise/database"
 	"practise/global"
+	"practise/handlers"
 	"practise/pkg/setting"
+
+	"github.com/gin-gonic/gin"
 )
 
 func setupSetting() error {
@@ -38,4 +41,16 @@ func main() {
 			//todo
 		}
 	}()
+
+	r := gin.Default()
+	port := global.ServerSetting.Port
+	dbGroup := r.Group("/db")
+	{
+		dbGroup.POST("/add", handlers.CreateUserHandler) //包裝db的func
+		dbGroup.GET("/getuser/:id", handlers.GetUserHandler)
+		dbGroup.GET("/updateuser/:id", handlers.UpdateUserHandler)
+		dbGroup.DELETE("/deluser/:id", handlers.DelUserHandler)
+	}
+
+	r.Run(":" + port)
 }
