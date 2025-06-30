@@ -6,3 +6,6 @@ Database:
   MongodbHost: 127.0.0.1
   MongodbPort: 27017
   Mongodb_db: test
+
+JWT:
+  JsonRSAPrivateKey: my_super_key_length_must_greater_than_32_for_RS256_and_can_input_anyword

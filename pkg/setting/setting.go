@@ -15,6 +15,10 @@ type DatabaseSetting struct {
 	Mongodb_db  string
 }
 
+type JWTSetting struct {
+	JsonRSAPrivateKey string
+}
+
 type Setting struct {
 	vp *viper.Viper
 }
