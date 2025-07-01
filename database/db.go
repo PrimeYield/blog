@@ -45,8 +45,9 @@ func GetCollection(collectionName string) *mongo.Collection {
 func CreateUser(username string, age int) (primitive.ObjectID, error) {
 	collection := GetCollection("users")
 	user := models.User{
-		Username: username,
-		Age:      age,
+		Username:  username,
+		Age:       age,
+		CreatedAt: time.Now(),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

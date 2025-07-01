@@ -1,6 +1,8 @@
 package setting
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 )
 
@@ -16,7 +18,9 @@ type DatabaseSetting struct {
 }
 
 type JWTSetting struct {
-	JsonRSAPrivateKey string
+	Secret string
+	Issuer string
+	Expire time.Duration
 }
 
 type Setting struct {

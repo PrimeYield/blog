@@ -8,4 +8,7 @@ Database:
   Mongodb_db: test
 
 JWT:
-  JsonRSAPrivateKey: my_super_key_length_must_greater_than_32_for_RS256_and_can_input_anyword
+  Secret: himitsu_do_not_expose_very_important_my_super_key_need_change_sometimes
+  Issuer: my_blog_api_com
+  Expire: 7200s
+  
