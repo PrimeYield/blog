@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的部落格前端</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        h2 { color: #333; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="password"], textarea {
+            width: calc(100% - 22px); /* Adjust for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #0056b3; }
+        .message { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>用戶登入</h2>
+        <form id="loginForm">
+            <label for="username">用戶名:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">密碼:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">登入</button>
+        </form>
+        <div id="loginMessage" class="message"></div>
+    </div>
+
+    <hr>
+
+    <div class="container" style="margin-top: 30px;">
+        <h2>創建新文章 (需要登入)</h2>
+        <form id="createArticleForm">
+            <label for="articleTitle">文章標題:</label>
+            <input type="text" id="articleTitle" name="title" required>
+
+            <label for="articleContent">文章內容:</label>
+            <textarea id="articleContent" name="content" rows="6" required></textarea>
+
+            <button type="submit">創建文章</button>
+        </form>
+        <div id="articleMessage" class="message"></div>
+    </div>
+
+    <script>
+        // 設定你的後端 API 基礎 URL
+        const BASE_URL = 'http://localhost:8080'; // 根據你的 Gin 服務端口修改
+
+        // --- 登入表單處理 ---
+        const loginForm = document.getElementById('loginForm');
+        const loginMessage = document.getElementById('loginMessage');
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // 阻止表單默認提交行為 (會導致頁面刷新)
+
+            const username = loginForm.username.value;
+            const password = loginForm.password.value;
+
+            try {
+                // 發送 POST 請求到登入 API
+                const response = await fetch(`${BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // 告訴伺服器我們發送的是 JSON 格式
+                    },
+                    body: JSON.stringify({ username, password }), // 將用戶名和密碼轉換為 JSON 字串
+                });
+
+                const data = await response.json(); // 解析伺服器響應的 JSON 數據
+
+                if (response.ok) { // HTTP 狀態碼 200-299 視為成功
+                    // 登入成功後，理論上後端會通過 Cookie 返回 JWT，
+                    // 但為了演示，我們假設後端也會在響應體中返回 token (這是一種常見的輔助方式)
+                    // 或者，你可以忽略從響應體拿 token，因為 HttpOnly Cookie 會自動處理
+                    // 這裡我們只顯示成功訊息
+                    loginMessage.className = 'message success';
+                    loginMessage.textContent = '登入成功！您可以嘗試創建文章了。';
+                    console.log('Login successful:', data);
+
+                    // 如果後端有在響應體返回 token，可以在此儲存 (但 HttpOnly Cookie 更安全)
+                    // if (data.token) {
+                    //     localStorage.setItem('jwtToken', data.token);
+                    //     console.log('JWT Token stored in localStorage:', data.token);
+                    // }
+
+                } else {
+                    // 登入失敗
+                    loginMessage.className = 'message error';
+                    loginMessage.textContent = `登入失敗: ${data.error || '未知錯誤'}`;
+                    console.error('Login failed:', data);
+                }
+            } catch (error) {
+                // 網路錯誤或其他異常
+                loginMessage.className = 'message error';
+                loginMessage.textContent = `請求失敗: ${error.message}`;
+                console.error('Fetch error during login:', error);
+            }
+        });
+
+        // --- 創建文章表單處理 ---
+        const createArticleForm = document.getElementById('createArticleForm');
+        const articleMessage = document.getElementById('articleMessage');
+
+        createArticleForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // 阻止表單默認提交行為
+
+            const title = createArticleForm.articleTitle.value;
+            const content = createArticleForm.articleContent.value;
+
+            // 從 localStorage 獲取 JWT Token
+            // 注意：如果你的後端只設定 HttpOnly Cookie，這裡就無法從 localStorage 獲取了。
+            // 這種情況下，你需要依賴瀏覽器自動發送 Cookie。
+            // 但如果你的 AuthMiddleware 檢查的是 `Authorization` 頭，你就需要讓前端手動添加。
+            // 這個範例假設後端 AuthMiddleware 檢查 Authorization 頭。
+            const token = localStorage.getItem('jwtToken'); 
+
+            if (!token) {
+                articleMessage.className = 'message error';
+                articleMessage.textContent = '請先登入，沒有找到認證 Token。';
+                return;
+            }
+
+            try {
+                // 發送 POST 請求到創建文章 API
+                const response = await fetch(`${BASE_URL}/arti/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // <--- 關鍵：將 JWT Token 放在 Authorization 頭部
+                    },
+                    body: JSON.stringify({ title, content }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    articleMessage.className = 'message success';
+                    articleMessage.textContent = `文章創建成功！ID: ${data.id}`;
+                    createArticleForm.reset(); // 清空表單
+                } else {
+                    articleMessage.className = 'message error';
+                    articleMessage.textContent = `創建文章失敗: ${data.error || '未知錯誤'}`;
+                    console.error('Create article failed:', data);
+                }
+            } catch (error) {
+                articleMessage.className = 'message error';
+                articleMessage.textContent = `請求失敗: ${error.message}`;
+                console.error('Fetch error during article creation:', error);
+            }
+        });
+    </script>
+
+</body>
+</html>
