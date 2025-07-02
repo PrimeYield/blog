@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"practise/database"
+	"practise/global"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,20 +24,21 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 	token, err := database.Login(loginRequest.Username, loginRequest.Password)
-	if err != nil{
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	expiration := time.Now().Add(24 * time.Hour)
+	tokenExpiration := time.Now().Add(global.JWTSetting.Expire)
+	maxAge := int(time.Until(tokenExpiration).Seconds())
 	c.SetCookie(
-		"jwt_token",          
-		token,               
-		// int(expiration.Sub(time.Now()).Seconds()), 
-		int(expiration.Add(time.Hour *24).Second()),
-		"/",                  // Cookie 的路徑，"/" 表示整個網站都可用
-		"localhost",          
-		true,                 // Secure: 只在 HTTPS 連接時發送。生產環境強烈建議設為 true。
-		true,                 // HttpOnly: 設為 true，表示 JavaScript 無法訪問此 Cookie。這是關鍵！
+		"jwt_token",
+		token,
+		// int(expiration.Sub(time.Now()).Seconds()),
+		maxAge,
+		"/", // Cookie 的路徑，"/" 表示整個網站都可用
+		"localhost",
+		true, // Secure: 只在 HTTPS 連接時發送。生產環境強烈建議設為 true。
+		true, // HttpOnly: 設為 true，表示 JavaScript 無法訪問此 Cookie。這是關鍵！
 	)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",

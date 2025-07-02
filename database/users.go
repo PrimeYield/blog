@@ -22,34 +22,34 @@ func GetCollection(collectionName string) *mongo.Collection {
 	return Client.Database(databaseName).Collection(collectionName)
 }
 
-func CreateUser(username,password string, age int) (primitive.ObjectID, error) {
+func CreateUser(username, password string, age int) (primitive.ObjectID, error) {
 	if len(password) < 6 {
-		return primitive.NilObjectID,fmt.Errorf("len(password) > 6")
+		return primitive.NilObjectID, fmt.Errorf("len(password) > 6")
 	}
-	
-	target,_  := FindUserByUsername(username)
-	if target != nil {
-		return primitive.NilObjectID,fmt.Errorf("%v is already exists",username)
+
+	target, _ := FindUserByUsername(username)
+	if target != nil { //如果username是FindUserByUsername無法匹配的，會回傳nil,error才對 不明白為什麼target會有值
+		return primitive.NilObjectID, fmt.Errorf("%v is already exists", username)
 	}
 	// if target.Username != "" {
 	// 	return primitive.NilObjectID, fmt.Errorf("%s is already exists",target.Username)
 	// }
 	// if err != nil && err.Error() == fmt.Errorf("username: '%s'  is not exists", username).Error() {
 	// 	//do nothing
-    // } else if err != nil {
-    //     return primitive.NilObjectID, fmt.Errorf("failed to check existing user: %w", err)
-    // } else if target != nil {
-    //     return primitive.NilObjectID, fmt.Errorf("%s is already exists", username)
-    // }
+	// } else if err != nil {
+	//     return primitive.NilObjectID, fmt.Errorf("failed to check existing user: %w", err)
+	// } else if target != nil {
+	//     return primitive.NilObjectID, fmt.Errorf("%s is already exists", username)
+	// }
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return primitive.NilObjectID,fmt.Errorf("failed to hash password: %v", err)
+		return primitive.NilObjectID, fmt.Errorf("failed to hash password: %v", err)
 	}
 	collection := GetCollection("users")
 	// fmt.Println(collection)
 	user := models.User{
 		Username:  username,
-		Password: string(hashedPassword),
+		Password:  string(hashedPassword),
 		Age:       age,
 		CreatedAt: time.Now(),
 	}
@@ -100,12 +100,12 @@ func FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	err := cursor.Decode(&user)
 	if err != nil {
-		if err == mongo.ErrNoDocuments{
-		return nil, fmt.Errorf("username: '%s'  is not exists", username)
+		if err == mongo.ErrNoDocuments { //這裡return 了 nil 怎麼會在Create()裡面有值呢???
+			return nil, fmt.Errorf("username: '%s'  is not exists", username)
 		}
 		return nil, fmt.Errorf("bad request for %s", username)
-	}	
-	return &user,nil
+	}
+	return &user, nil
 }
 
 func UpdateUserByID(id primitive.ObjectID, updates bson.M) (int64, error) {
@@ -120,14 +120,14 @@ func UpdateUserByID(id primitive.ObjectID, updates bson.M) (int64, error) {
 	// updateAt := time.Now()
 	// update := bson.M{"$set": updates, "updated_at": updateAt}
 	setUpdate := make(bson.M)
-	for k,v := range updates{
+	for k, v := range updates {
 		setUpdate[k] = v
 	}
 	updateAt := time.Now()
 	setUpdate["updated_at"] = updateAt
 	newPassword, err := bcrypt.GenerateFromPassword([]byte(setUpdate["password"].(string)), bcrypt.DefaultCost)
 	if err != nil {
-		return 0,fmt.Errorf("failed to hash password: %v", err)
+		return 0, fmt.Errorf("failed to hash password: %v", err)
 	}
 	setUpdate["password"] = newPassword
 	update := bson.M{"$set": setUpdate}
@@ -136,7 +136,7 @@ func UpdateUserByID(id primitive.ObjectID, updates bson.M) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to update user: %v", err)
 	}
-	
+
 	return result.ModifiedCount, nil // 返回被修改的文檔數量
 }
 

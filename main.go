@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"practise/config"
 	"practise/database"
 	"practise/global"
 	"practise/handlers"
@@ -27,6 +29,8 @@ func setupSetting() error {
 		fmt.Println(err)
 		return err
 	}
+
+	err = setting.ReadSection("JWT", &global.JWTSetting)
 	return nil
 }
 
@@ -43,9 +47,14 @@ func main() {
 		}
 	}()
 
+	err = config.LoadJWTSigningKey(global.JWTSetting.Secret)
+	if err != nil {
+		log.Fatalf("Failed to load JWT signing key: %v", err)
+	}
+
 	r := gin.Default()
 	port := global.ServerSetting.Port
-	r.POST("/login",handlers.LoginHandler)
+	r.POST("/login", handlers.LoginHandler)
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/add", handlers.CreateUserHandler) //包裝db的func
@@ -56,11 +65,11 @@ func main() {
 	articleGroup := r.Group("/arti")
 	articleGroup.Use(middleware.AuthMiddleware())
 	{
-		articleGroup.POST("/create",handlers.CreateArticleHandler)
-		articleGroup.POST("/update",handlers.UpdateArticleHandler)
-		articleGroup.DELETE("/delete",handlers.DeleteArticleHandler)
-		articleGroup.POST("/getById",handlers.GetArticleHandler)
-		articleGroup.POST("/getByAuthor",handlers.GetAuthorArticlesHandler)
+		articleGroup.POST("/create", handlers.CreateArticleHandler)
+		articleGroup.POST("/update", handlers.UpdateArticleHandler)
+		articleGroup.DELETE("/delete", handlers.DeleteArticleHandler)
+		articleGroup.POST("/getById", handlers.GetArticleHandler)
+		articleGroup.POST("/getByAuthor", handlers.GetAuthorArticlesHandler)
 	}
 
 	r.Run(":" + port)

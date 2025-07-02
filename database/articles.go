@@ -61,7 +61,7 @@ func CreateArticle(article models.Article) (primitive.ObjectID, error) {
 
 	result, err := collection.InsertOne(ctx, article)
 	if err != nil {
-		return primitive.NilObjectID, fmt.Errorf("failed to insert article: %w", err)
+		return primitive.NilObjectID, fmt.Errorf("failed to insert article: %v", err)
 	}
 	return result.InsertedID.(primitive.ObjectID), nil
 }
@@ -77,11 +77,11 @@ func UpdateArticle(id primitive.ObjectID, updateData bson.M) (int64, error) {
 	//修正無法正確寫入updated_at
 	updateAt := time.Now()
 	includeUpdateAt := make(bson.M)
-	for k,v := range updateData {
+	for k, v := range updateData {
 		includeUpdateAt[k] = v
 	}
 	includeUpdateAt["updated_at"] = updateAt
-	
+
 	finalUpdate := bson.M{
 		"$set": includeUpdateAt, // $set 來自請求體提供的數據
 	}

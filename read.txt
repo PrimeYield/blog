@@ -21,6 +21,8 @@
 
 同樣的問題也發生在/database/articles.go
   修改中...
+  done !
 
 /database/users.go在修正功能時有出錯：
   CreateUser當中FindByUsername()後的if出錯
+  
