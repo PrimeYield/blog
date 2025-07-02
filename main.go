@@ -48,7 +48,7 @@ func main() {
 	{
 		dbGroup.POST("/add", handlers.CreateUserHandler) //包裝db的func
 		dbGroup.GET("/getuser/:id", handlers.GetUserHandler)
-		dbGroup.GET("/updateuser/:id", handlers.UpdateUserHandler)
+		dbGroup.POST("/updateuser/:id", handlers.UpdateUserHandler)
 		dbGroup.DELETE("/deluser/:id", handlers.DelUserHandler)
 	}
 

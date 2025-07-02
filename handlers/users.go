@@ -19,7 +19,7 @@ func CreateUserHandler(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
-	insertedID, err := database.CreateUser(user.Username, user.Age)
+	insertedID, err := database.CreateUser(user.Username,user.Password, user.Age)
 	if err != nil {
 		log.Printf("Failed to create user:%v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{

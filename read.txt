@@ -12,3 +12,12 @@
           - **解密方：** 使用**自己的私鑰**來解密。
         但通常 JWT 認證只涉及簽名，很少會涉及整個 Token 的加密。
         所以，這段程式碼的註解是指非對稱加密的驗證方需要公鑰，但你目前的實現是 HS256，所以用的是同一個共享密鑰。
+
+
+需要微調的FUNC：
+/database/db.go.UpdateUserByID(id primitive.ObjectID, updates bson.M)
+  不能正確更新UpdatedAt的值
+  done ! 路徑修正到：/database/users.go
+
+同樣的問題也發生在/database/articles.go
+  修改中...
