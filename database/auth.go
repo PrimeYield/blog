@@ -11,10 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LoginRequest struct {
-	Username string `json:"username" binding:"required"` // binding 用於 Gin 的請求體驗證
-	Password string `json:"password" binding:"required"`
-}
+
 
 func GenerateToken(username string) (string, error) {
 	// 1. 獲取簽名密鑰
@@ -49,7 +46,7 @@ func GenerateToken(username string) (string, error) {
 func Login(username, password string) (string,error) {
 	//先匹配db
 	// collection:= GetCollection("users")
-	user,err:=FindUsersByUsername(username)
+	user,err:=FindUserByUsername(username)
 	if err != nil {
 		return "",err
 	}

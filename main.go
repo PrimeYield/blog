@@ -6,6 +6,7 @@ import (
 	"practise/database"
 	"practise/global"
 	"practise/handlers"
+	"practise/middleware"
 	"practise/pkg/setting"
 
 	"github.com/gin-gonic/gin"
@@ -44,12 +45,22 @@ func main() {
 
 	r := gin.Default()
 	port := global.ServerSetting.Port
-	dbGroup := r.Group("/db")
+	r.POST("/login",handlers.LoginHandler)
+	userGroup := r.Group("/user")
 	{
-		dbGroup.POST("/add", handlers.CreateUserHandler) //包裝db的func
-		dbGroup.GET("/getuser/:id", handlers.GetUserHandler)
-		dbGroup.POST("/updateuser/:id", handlers.UpdateUserHandler)
-		dbGroup.DELETE("/deluser/:id", handlers.DelUserHandler)
+		userGroup.POST("/add", handlers.CreateUserHandler) //包裝db的func
+		userGroup.GET("/get/:id", handlers.GetUserHandler)
+		userGroup.POST("/update/:id", handlers.UpdateUserHandler)
+		userGroup.DELETE("/delete/:id", handlers.DelUserHandler)
+	}
+	articleGroup := r.Group("/arti")
+	articleGroup.Use(middleware.AuthMiddleware())
+	{
+		articleGroup.POST("/create",handlers.CreateArticleHandler)
+		articleGroup.POST("/update",handlers.UpdateArticleHandler)
+		articleGroup.DELETE("/delete",handlers.DeleteArticleHandler)
+		articleGroup.POST("/getById",handlers.GetArticleHandler)
+		articleGroup.POST("/getByAuthor",handlers.GetAuthorArticlesHandler)
 	}
 
 	r.Run(":" + port)

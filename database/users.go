@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // db:=Client.Database(databaseName)
@@ -26,15 +27,29 @@ func CreateUser(username,password string, age int) (primitive.ObjectID, error) {
 		return primitive.NilObjectID,fmt.Errorf("len(password) > 6")
 	}
 	
-	target,_  := FindUsersByUsername(username)
+	target,_  := FindUserByUsername(username)
 	if target != nil {
-		return primitive.NilObjectID, fmt.Errorf("%s is already exists",target.Username)
+		return primitive.NilObjectID,fmt.Errorf("%v is already exists",username)
+	}
+	// if target.Username != "" {
+	// 	return primitive.NilObjectID, fmt.Errorf("%s is already exists",target.Username)
+	// }
+	// if err != nil && err.Error() == fmt.Errorf("username: '%s'  is not exists", username).Error() {
+	// 	//do nothing
+    // } else if err != nil {
+    //     return primitive.NilObjectID, fmt.Errorf("failed to check existing user: %w", err)
+    // } else if target != nil {
+    //     return primitive.NilObjectID, fmt.Errorf("%s is already exists", username)
+    // }
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return primitive.NilObjectID,fmt.Errorf("failed to hash password: %v", err)
 	}
 	collection := GetCollection("users")
 	// fmt.Println(collection)
 	user := models.User{
 		Username:  username,
-		Password: password,
+		Password: string(hashedPassword),
 		Age:       age,
 		CreatedAt: time.Now(),
 	}
@@ -61,6 +76,7 @@ func FindUserByID(id primitive.ObjectID) (*models.User, error) {
 	filter := bson.M{"_id": id} //M is an unordered representation of a BSON document.
 	//FindOne executes a find command and returns a SingleResult for one document in the collection.
 	err := collection.FindOne(ctx, filter).Decode(&user) //Decode will unmarshal the document represented by this SingleResult into v(&user).
+	fmt.Println(user)
 	if err != nil {
 		//ErrNoDocuments is returned by SingleResult methods when the operation that created the SingleResult did not return any documents.
 		if err == mongo.ErrNoDocuments {
@@ -72,7 +88,7 @@ func FindUserByID(id primitive.ObjectID) (*models.User, error) {
 }
 
 // find multipy users by username
-func FindUsersByUsername(username string) (*models.User, error) {
+func FindUserByUsername(username string) (*models.User, error) {
 	collection := GetCollection("users") //這個是mongodb的起手式
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -109,6 +125,11 @@ func UpdateUserByID(id primitive.ObjectID, updates bson.M) (int64, error) {
 	}
 	updateAt := time.Now()
 	setUpdate["updated_at"] = updateAt
+	newPassword, err := bcrypt.GenerateFromPassword([]byte(setUpdate["password"].(string)), bcrypt.DefaultCost)
+	if err != nil {
+		return 0,fmt.Errorf("failed to hash password: %v", err)
+	}
+	setUpdate["password"] = newPassword
 	update := bson.M{"$set": setUpdate}
 
 	result, err := collection.UpdateOne(ctx, filter, update)
