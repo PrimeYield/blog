@@ -13,6 +13,10 @@ import (
 )
 
 func CreateArticleHandler(c *gin.Context) {
+	fmt.Println("CreatHandler", c.Keys)
+	// fmt.Printf("CreatHandler %v,%b", c.Get("username"))
+	fmt.Println("CreatHandler", c.GetString("username"))
+
 	var article models.Article
 
 	if err := c.ShouldBindJSON(&article); err != nil {
@@ -20,6 +24,8 @@ func CreateArticleHandler(c *gin.Context) {
 			"error": fmt.Sprintf("Invalid request body: %v", err.Error())})
 		return
 	}
+
+	article.CreatedBy = c.GetString("username")
 
 	// username, exists := c.Get("username")
 	// if !exists {
@@ -32,7 +38,9 @@ func CreateArticleHandler(c *gin.Context) {
 
 	// 完成一個認證系統
 
-	article.CreatedBy = c.GetString("claims.username")
+	// article.CreatedBy = c.GetString("username")
+	// fmt.Println(c.GetString("JwtID"))
+	// fmt.Println(c.Keys)
 	// article.CreatedBy = c.
 
 	insertedID, err := database.CreateArticle(article)

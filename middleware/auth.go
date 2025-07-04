@@ -16,33 +16,38 @@ func AuthMiddleware() gin.HandlerFunc {
 
 func authMiddleware(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
-	if len(authHeader) == 0{
-		c.AbortWithStatusJSON(http.StatusUnauthorized,gin.H{
+	if len(authHeader) == 0 {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Authorization header required",
 		})
 		log.Printf("Authorization header required")
 		return
 	}
 
-	parts := strings.Split(authHeader," ")
+	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized,gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Authorization header format must be Bearer <token>",
 		})
 		log.Print("Authorization header format must be Bearer <token>")
 		return
 	}
 
-	tokenStr := parts[1]  //存前端傳來的Token  通常就是從Header提取  比較要記的是Authorization: Bearer <token>這個固定的鍵值對
+	tokenStr := parts[1] //存前端傳來的Token  通常就是從Header提取  比較要記的是Authorization: Bearer <token>這個固定的鍵值對
 
-	token,err := jwt.ValidateToken(tokenStr)
-	log.Printf("%v",token)
+	token, err := jwt.ValidateToken(tokenStr)
+	log.Printf("Middlerware:%v", token)
 	if err != nil || token == nil {
-		fmt.Printf("tokenStr is a wrong request %v",err)
+		fmt.Printf("tokenStr is a wrong request %v", err)
 		return
 	}
 	// username, err := token.Get("username")
-	c.Set("username",c.Request.URL.User.Username())
+	createdBy, ok := token.Get("username")
+	if !ok {
+		fmt.Println("Middlleware: <key: username> is not exists")
+		return
+	}
+	c.Set("username", createdBy)
 	c.Next()
 }
 
