@@ -57,9 +57,12 @@ func CreateArticle(article models.Article) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	article.CreatedAt = time.Now()
+	models.UserArticle.CreatedAt = time.Now()
+	models.UserArticle.Title = article.Title
+	models.UserArticle.Content = article.Content
+	models.UserArticle.CreatedBy = models.UserInfo.Username
 
-	result, err := collection.InsertOne(ctx, article)
+	result, err := collection.InsertOne(ctx, models.UserArticle)
 	if err != nil {
 		return primitive.NilObjectID, fmt.Errorf("failed to insert article: %v", err)
 	}

@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"practise/config"
 	"practise/database"
 	"practise/global"
 	"practise/handlers"
@@ -12,6 +10,7 @@ import (
 	"practise/pkg/setting"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lestrrat-go/jwx/v2/jwa"
 )
 
 func setupSetting() error {
@@ -31,6 +30,11 @@ func setupSetting() error {
 	}
 
 	err = setting.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	global.JWTSetting.Algorithm = jwa.HS256
 	return nil
 }
 
@@ -47,10 +51,11 @@ func main() {
 		}
 	}()
 
-	err = config.LoadJWTSigningKey(global.JWTSetting.Secret)
-	if err != nil {
-		log.Fatalf("Failed to load JWT signing key: %v", err)
-	}
+	// err = config.LoadJWTSigningKey(global.JWTSetting.Secret)
+	// if err != nil {
+	// 	log.Fatalf("Failed to load JWT signing key: %v", err)
+	// }
+	
 
 	r := gin.Default()
 	port := global.ServerSetting.Port

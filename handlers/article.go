@@ -21,9 +21,19 @@ func CreateArticleHandler(c *gin.Context) {
 		return
 	}
 
+	// username, exists := c.Get("username")
+	// if !exists {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{
+	// 		"error": "Authenticated user information not found",
+	// 	})
+	// 	return
+	// }
+	// models.UserArticle.CreatedBy = username.(string)
+
 	// 完成一個認證系統
 
-	article.CreatedBy = c.GetString("username")
+	article.CreatedBy = c.GetString("claims.username")
+	// article.CreatedBy = c.
 
 	insertedID, err := database.CreateArticle(article)
 	if err != nil {

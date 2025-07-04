@@ -3,6 +3,7 @@ package setting
 import (
 	"time"
 
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/spf13/viper"
 )
 
@@ -18,6 +19,7 @@ type DatabaseSetting struct {
 }
 
 type JWTSetting struct {
+	Algorithm jwa.SignatureAlgorithm
 	Secret string
 	Issuer string
 	Expire time.Duration
