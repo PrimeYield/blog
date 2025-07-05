@@ -60,7 +60,7 @@ func CreateArticle(article models.Article) (primitive.ObjectID, error) {
 	models.UserArticle.CreatedAt = time.Now()
 	models.UserArticle.Title = article.Title
 	models.UserArticle.Content = article.Content
-	models.UserArticle.CreatedBy = models.UserInfo.Username
+	models.UserArticle.CreatedBy = article.CreatedBy
 
 	result, err := collection.InsertOne(ctx, models.UserArticle)
 	if err != nil {
