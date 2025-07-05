@@ -22,7 +22,8 @@ func GenerateToken(username string) (string,error) {
 	Issuer(global.JWTSetting.Issuer).
 	IssuedAt(now).
 	Expiration(now.Add(global.JWTSetting.Expire)).
-	Claim("username",username).
+	// Claim("username",username).
+	Subject(username).
 	Build()
 	if err != nil {
 		return "", fmt.Errorf("failed to build JWT token: %v",err)

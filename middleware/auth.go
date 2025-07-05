@@ -42,6 +42,12 @@ func authMiddleware(c *gin.Context) {
 		return
 	}
 	// username, err := token.Get("username")
+	username, ok := token.Get("username")
+		if !ok || username == nil {
+			log.Println("AuthMiddleware: Username not found in token claims")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token (username missing)"})
+			return
+		}
 	c.Set("username",c.Request.URL.User.Username())
 	c.Next()
 }
