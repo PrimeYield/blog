@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"practise/pkg/jwt"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,25 +14,41 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 func authMiddleware(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	if len(authHeader) == 0 {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error": "Authorization header required",
-		})
-		log.Printf("Authorization header required")
-		return
-	}
+	// 這只適用JS能提取token的作法
+	// authHeader := c.GetHeader("Authorization")
+	// if len(authHeader) == 0 {
+	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+	// 		"error": "Authorization header required",
+	// 	})
+	// 	log.Printf("Authorization header required")
+	// 	return
+	// }
 
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error": "Authorization header format must be Bearer <token>",
-		})
-		log.Print("Authorization header format must be Bearer <token>")
-		return
-	}
+	// parts := strings.Split(authHeader, " ")
+	// if len(parts) != 2 || parts[0] != "Bearer" {
+	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+	// 		"error": "Authorization header format must be Bearer <token>",
+	// 	})
+	// 	log.Print("Authorization header format must be Bearer <token>")
+	// 	return
+	// }
 
-	tokenStr := parts[1] //存前端傳來的Token  通常就是從Header提取  比較要記的是Authorization: Bearer <token>這個固定的鍵值對
+	// tokenStr := parts[1] //存前端傳來的Token  通常就是從Header提取  比較要記的是Authorization: Bearer <token>這個固定的鍵值對
+	tokenStr, err := c.Cookie("jwt_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+				log.Println("No 'myAuthToken' cookie found, unauthorized.")
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "Unauthorized: No authentication token found.",
+				})
+				return
+			}
+			log.Printf("Error getting cookie: %v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "Bad request.",
+			})
+			return
+	}
 
 	token, err := jwt.ValidateToken(tokenStr)
 	log.Printf("Middlerware:%v", token)

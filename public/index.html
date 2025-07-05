@@ -133,13 +133,17 @@
             // 這種情況下，你需要依賴瀏覽器自動發送 Cookie。
             // 但如果你的 AuthMiddleware 檢查的是 `Authorization` 頭，你就需要讓前端手動添加。
             // 這個範例假設後端 AuthMiddleware 檢查 Authorization 頭。
-            const token = localStorage.getItem('jwtToken'); 
+            // const token = localStorage.getItem('jwt_token'); 
+            // let ttoken = localStorage.getItem('cookie')
+            // console.log(`${token}`)
+            // console.log(`${ttoken}`)
+            // // const cookieT = Storage.getItem('jwt_token')
 
-            if (!token) {
-                articleMessage.className = 'message error';
-                articleMessage.textContent = '請先登入，沒有找到認證 Token。';
-                return;
-            }
+            // if (!token) {
+            //     articleMessage.className = 'message error';
+            //     articleMessage.textContent = '請先登入，沒有找到認證 Token。';
+            //     return;
+            // }
 
             try {
                 // 發送 POST 請求到創建文章 API
@@ -147,7 +151,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // <--- 關鍵：將 JWT Token 放在 Authorization 頭部
+                        // 'Authorization': `Bearer ${token}` // <--- 關鍵：將 JWT Token 放在 Authorization 頭部
                     },
                     body: JSON.stringify({ title, content }),
                 });

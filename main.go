@@ -58,6 +58,10 @@ func main() {
 	
 
 	r := gin.Default()
+	r.Static("public","./public")
+	r.GET("/",func(c *gin.Context){
+		c.File("./public/index.html")
+	})
 	port := global.ServerSetting.Port
 	r.POST("/login", handlers.LoginHandler)
 	userGroup := r.Group("/user")
