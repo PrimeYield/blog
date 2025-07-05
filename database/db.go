@@ -28,10 +28,6 @@ func MongodbJoin(databaseSetting *setting.DatabaseSetting) error {
 	return nil
 }
 
-
-
-
-
 // func setupSetting() error {
 // 	setting, err := setting.NewSetting()
 // 	if err != nil {
