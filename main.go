@@ -76,7 +76,7 @@ func main() {
 		articleGroup.POST("/create", handlers.CreateArticleHandler)
 		articleGroup.POST("/update", handlers.UpdateArticleHandler)
 		articleGroup.DELETE("/delete/:id", handlers.DeleteArticleHandler)
-		articleGroup.POST("/getById", handlers.GetArticleHandler)
+		articleGroup.POST("/getById/:id", handlers.GetArticleHandler)
 		articleGroup.POST("/getByAuthor", handlers.GetAuthorArticlesHandler)
 	}
 
