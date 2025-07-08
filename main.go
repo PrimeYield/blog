@@ -55,11 +55,10 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Failed to load JWT signing key: %v", err)
 	// }
-	
 
 	r := gin.Default()
-	r.Static("public","./public")
-	r.GET("/",func(c *gin.Context){
+	r.Static("public", "./public")
+	r.GET("/", func(c *gin.Context) {
 		c.File("./public/index.html")
 	})
 	port := global.ServerSetting.Port
@@ -76,7 +75,7 @@ func main() {
 	{
 		articleGroup.POST("/create", handlers.CreateArticleHandler)
 		articleGroup.POST("/update", handlers.UpdateArticleHandler)
-		articleGroup.DELETE("/delete", handlers.DeleteArticleHandler)
+		articleGroup.DELETE("/delete/:id", handlers.DeleteArticleHandler)
 		articleGroup.POST("/getById", handlers.GetArticleHandler)
 		articleGroup.POST("/getByAuthor", handlers.GetAuthorArticlesHandler)
 	}
